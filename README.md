@@ -47,8 +47,8 @@ See `docker-compose.yaml` for complete list of configurable options.
 
 ## 📂 Volumes
 
-- `./rootfs/config/picoshare` - Data storage
-- `./rootfs/data/picoshare` - Data storage
+- `./volumes/config/picoshare` - Data storage
+- `./volumes/data/picoshare` - Data storage
 
 ## 🔍 Logging
 
