@@ -1,5 +1,6 @@
 # nginx proxy address - http://172.17.0.1:8104
 
+name: picoshare
 x-logging: &default-logging
   driver: json-file
   options:
@@ -9,17 +10,18 @@ x-logging: &default-logging
 services:
   picoshare:
     image: picoshare/picoshare:latest
+    pull_policy: always
     container_name: picoshare-app
-    restart: unless-stopped
+    restart: always
     logging: *default-logging
     networks:
       - picoshare
     ports:
-      - "8104:8104"
+      - "172.17.0.1:8104:8080"
     environment:
       TZ: ${TZ:-America/New_York}
-      PUID: ${SERVICE_USER:-1000}
-      PGID: ${SERVICE_GROUP:-1000}
+      PORT: 8080
+      PS_SHARED_SECRET: ${APP_SHARED_SECRET:-changeme_shared_secret}
     volumes:
       - ./volumes/config/picoshare:/config
       - ./volumes/data/picoshare:/data
@@ -31,4 +33,5 @@ services:
 
 networks:
   picoshare:
+    name: picoshare
     external: false
