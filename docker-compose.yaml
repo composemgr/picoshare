@@ -23,14 +23,14 @@ services:
     environment:
       TZ: ${TZ:-America/New_York}
       PORT: 8080
-      PS_SHARED_SECRET: ${APP_SHARED_SECRET:-changeme_shared_secret}
+      PS_SHARED_SECRET: ${APP_SECRET_KEY:-changeme_secret_key}
       CONTAINER_NAME: picoshare-app
       HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
     volumes:
       - ./volumes/config/picoshare:/config
       - ./volumes/data/picoshare:/data
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8104"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
       interval: 30s
       timeout: 10s
       retries: 3
