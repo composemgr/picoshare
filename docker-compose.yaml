@@ -1,25 +1,23 @@
-# nginx proxy address - http://172.17.0.1:8104
+# nginx proxy address - http://172.17.0.1:64300
 
 name: picoshare
 x-logging: &default-logging
-  driver: json-file
   options:
-    max-size: "5m"
-    max-file: "1"
+    max-size: '5m'
+    max-file: '1'
+  driver: json-file
 
 services:
   picoshare:
-    image: picoshare/picoshare:latest
+    image: mtlynch/picoshare:latest
     pull_policy: always
     container_name: picoshare-app
     restart: always
     logging: *default-logging
+    ports:
+      - '172.17.0.1:64300:8080'
     networks:
       - picoshare
-      - proxy
-      - cloudflare
-    ports:
-      - "172.17.0.1:8104:8080"
     environment:
       TZ: ${TZ:-America/New_York}
       PORT: 8080
@@ -30,32 +28,12 @@ services:
       - ./volumes/config/picoshare:/config
       - ./volumes/data/picoshare:/data
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080"]
       interval: 30s
       timeout: 10s
       retries: 3
-    labels:
-      - 'traefik.enable=true'
-      - 'cloudflare.enable=true'
-      - 'traefik.docker.network=proxy'
-      - 'cloudflare.service=http://picoshare-app:8080'
-      - 'cloudflare.hostname=picoshare.${CLOUDFLARE_ZONE_NAME:-}'
-      - 'traefik.http.routers.picoshare-app.entrypoints=http'
-      - 'traefik.http.routers.picoshare-app-secure.tls=true'
-      - 'traefik.http.routers.picoshare-app.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
-      - 'traefik.http.middlewares.picoshare-app-https-redirect.redirectscheme.scheme=https'
-      - 'traefik.http.routers.picoshare-app.middlewares=picoshare-app-https-redirect'
-      - 'traefik.http.routers.picoshare-app-secure.entrypoints=https'
-      - 'traefik.http.routers.picoshare-app-secure.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
-      - 'traefik.http.routers.picoshare-app-secure.tls.certresolver=cloudflare'
-      - 'traefik.http.routers.picoshare-app-secure.service=picoshare-app'
-      - 'traefik.http.services.picoshare-app.loadbalancer.server.port=8080'
 
 networks:
   picoshare:
     name: picoshare
     external: false
-  proxy:
-    external: true
-  cloudflare:
-    external: true
